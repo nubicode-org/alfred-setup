@@ -1,0 +1,14 @@
+[Unit]
+Description=Report disk usage of the largest directories under /var
+Documentation=https://www.freedesktop.org/software/systemd/man/systemd.service.html
+
+[Service]
+Type=oneshot
+# As a system unit, run as an unprivileged user. Remove this line when installing as a user unit.
+User=nobody
+ExecStart=/bin/sh -c 'df -h / && du -xh --max-depth=1 /var 2>/dev/null | sort -rh | head -n 10'
+# A report needs to read, never to write: deny everything else.
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes

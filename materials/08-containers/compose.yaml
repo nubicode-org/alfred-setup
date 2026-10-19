@@ -1,0 +1,31 @@
+# docker compose up --build    then open http://localhost:8080
+# docker compose down          stops and removes the containers (the named volume is kept)
+services:
+  web:
+    build: ./app
+    image: alfred-hello:dev
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      GREETING: Hello from compose
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      cache:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cache:
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - cache-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  cache-data:

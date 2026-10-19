@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: alfred
+  labels:
+    app: hello
+spec:
+  replicas: 3
+  # The selector must match the template's labels, or the deployment manages nothing (Module 1).
+  selector:
+    matchLabels:
+      app: hello
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Never drop below the full count during a rollout; add one new pod at a time (Module 2).
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # Spread replicas across nodes, so losing one node does not take them all (Module 4).
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: hello
+      containers:
+        - name: web
+          image: alfred-hello:dev
+          # The image is loaded into kind, not pulled from a registry.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: hello-config
+                  key: greeting
+          # Requests are what the scheduler reserves; a pod that requests too much stays Pending (Module 4).
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config
+  namespace: alfred
+data:
+  # Changing this does not reach running pods by itself: env is read at start (Module 3).
+  # Apply the change, then: kubectl -n alfred rollout restart deployment/hello
+  greeting: Hello from Kubernetes

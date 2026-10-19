@@ -1,0 +1,12 @@
+[Unit]
+Description=Run disk-report.service every day
+
+[Timer]
+OnCalendar=daily
+# If the machine was off at the scheduled time, run at the next boot instead of skipping a day.
+Persistent=true
+# Spread the start over 30 minutes so a fleet of machines does not all run at midnight.
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

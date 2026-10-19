@@ -1,0 +1,29 @@
+# Example ~/.ssh/config. Merge the parts you need into your own file, then: chmod 600 ~/.ssh/config
+# The first matching value wins, so specific hosts go above the catch-all at the bottom.
+
+# GitHub, with a dedicated key.
+Host github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  AddKeysToAgent yes
+  # macOS only: remember the passphrase in the Keychain.
+  # UseKeychain yes
+
+# A server you reach by a short name: "ssh lab" instead of "ssh -i ... ada@203.0.113.10".
+Host lab
+  HostName 203.0.113.10
+  User ada
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+
+# A machine reachable only through a jump host (bastion).
+Host internal-db
+  HostName 10.0.2.15
+  User ada
+  ProxyJump lab
+
+# Defaults for everything else.
+Host *
+  ServerAliveInterval 60
+  ServerAliveCountMax 3

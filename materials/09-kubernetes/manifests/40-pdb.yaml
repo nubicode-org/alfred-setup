@@ -1,0 +1,12 @@
+# Keep at least two replicas running during voluntary disruptions such as a node drain (Module 5).
+# minAvailable: 3 with 3 replicas would make every drain impossible: the course's last scenario.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hello
+  namespace: alfred
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: hello

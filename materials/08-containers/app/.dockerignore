@@ -1,0 +1,8 @@
+# Keep the build context small and free of secrets: only what the Dockerfile copies is needed.
+node_modules
+npm-debug.log
+.git
+.env
+.env.*
+Dockerfile
+.dockerignore

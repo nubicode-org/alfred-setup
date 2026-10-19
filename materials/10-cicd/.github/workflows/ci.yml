@@ -1,0 +1,65 @@
+# A pipeline for the app in 08-containers: lint, test, then build the image only if both pass.
+# GitHub runs workflows only from the root of a repository, so this one runs once you copy it there
+# (see the README in this folder).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# The token gets read access to the code and nothing else, unless a job asks for more (Module 5).
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run it replaces.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Actions are pinned to a full commit, not a tag: a tag can be moved to different code (Module 5).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Lint YAML
+        run: yamllint --strict .
+      - name: Lint workflows
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Quoted, so YAML cannot read a version such as 24.10 as a number (Module 2).
+          node-version: "24"
+      - run: npm test
+
+  image:
+    # Only build what has passed the gates (Module 3).
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build the image
+        run: docker build -t "alfred-hello:${GITHUB_SHA::12}" app
+      - name: Smoke test the image
+        run: |
+          docker run -d --name smoke -p 8080:8080 "alfred-hello:${GITHUB_SHA::12}"
+          for _ in $(seq 1 20); do
+            curl -fsS localhost:8080/healthz && exit 0
+            sleep 1
+          done
+          docker logs smoke
+          exit 1

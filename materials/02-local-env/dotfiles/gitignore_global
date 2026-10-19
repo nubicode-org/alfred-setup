@@ -1,0 +1,24 @@
+# Files your operating system and editor create, in every repository you touch.
+# Project-specific ignores (build output, dependencies) belong in that project's own .gitignore,
+# so everyone who clones it gets them.
+
+# macOS
+.DS_Store
+._*
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*~
+
+# Local environment files that often hold secrets
+.env
+.env.*
+!.env.example

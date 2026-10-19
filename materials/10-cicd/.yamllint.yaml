@@ -1,0 +1,13 @@
+# yamllint configuration for a repository with workflows, compose files and manifests.
+extends: default
+
+rules:
+  line-length:
+    max: 160
+  # GitHub Actions uses "on:" as a key; yamllint would otherwise read it as a boolean.
+  truthy:
+    allowed-values: ["true", "false"]
+    check-keys: false
+  document-start: disable
+  comments:
+    min-spaces-from-content: 1

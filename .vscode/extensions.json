@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "editorconfig.editorconfig",
+    "redhat.vscode-yaml",
+    "ms-python.python",
+    "golang.go",
+    "timonwong.shellcheck",
+    "ms-azuretools.vscode-docker",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "github.vscode-github-actions"
+  ]
+}

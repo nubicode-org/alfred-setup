@@ -1,0 +1,17 @@
+# Copy to the root of a repository as .pre-commit-config.yaml, then run: pre-commit install
+# Versions are pinned so everyone runs the same checks; "pre-commit autoupdate" moves them forward.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks

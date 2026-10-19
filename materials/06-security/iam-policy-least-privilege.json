@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListOnlyTheReportsPrefix",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::example-reports-bucket",
+      "Condition": {
+        "StringLike": { "s3:prefix": ["nightly/*"] }
+      }
+    },
+    {
+      "Sid": "ReadAndWriteReportObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": "arn:aws:s3:::example-reports-bucket/nightly/*"
+    },
+    {
+      "Sid": "RefuseUnencryptedTransport",
+      "Effect": "Deny",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::example-reports-bucket",
+        "arn:aws:s3:::example-reports-bucket/*"
+      ],
+      "Condition": {
+        "Bool": { "aws:SecureTransport": "false" }
+      }
+    }
+  ]
+}
