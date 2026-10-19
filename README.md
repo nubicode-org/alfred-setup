@@ -1,3 +1,5 @@
+**English** · [Español](README.es.md) · [Português](README.pt.md)
+
 # Alfred Learning setup kit
 
 Get your computer ready for the [Alfred Learning](https://alfred.nubicode.com) DevOps and Cloud
